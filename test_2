@@ -1,0 +1,6 @@
+mov GIM, 2
+inc GIM
+add AYB, GIM
+mul GIM, 2
+print GIM
+end

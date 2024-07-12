@@ -1,0 +1,12 @@
+mov ayb, 20 
+mov ben, 12
+l1:
+print gim
+inc ayb
+cmp ayb, ben
+je l1
+inc ayb
+dec ben
+print atb
+print ben
+end
