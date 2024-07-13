@@ -18,8 +18,6 @@ public:
     void dec(int val);
     void myNot(int val);
     int getValue() const;
-    bool getBooleanValue() const;
-    int getFlag() const;
     std::map<std::string, void(ALU::*)(int, int)> get2OperandsOperations() const;
     std::map<std::string, void(ALU::*)(int)> get1OperandOperations() const;
     void executeOperation2Operands(const std::string& op, int val1, int val2);
@@ -33,8 +31,6 @@ private:
     std::map<std::string, void(ALU::*)(int, int)> m_2OperandsOperations;
     std::map<std::string, void(ALU::*)(int)> m_1OperandOperations;
     int m_value;
-    bool m_booleanValue;
-    int m_flag;
 };
 
 #endif

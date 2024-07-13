@@ -17,7 +17,7 @@ public:
     void initializeRegisters();
     void readFromFile(const std::string& inputFileName);
     void executeProgramme();
-    void loadProgrammeToMemory() const;
+    void seeRam32BitAddress() const;
     
 private:
     instructions_vector m_instructions;

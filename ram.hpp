@@ -10,6 +10,7 @@ public:
     void loadToMemory(std::size_t index, int value);
     int getMemoryValue(std::size_t index) const;
     void setMemoryValue(std::size_t index, int value);
+    std::size_t getMemorySize() const;
 private:
     std::vector<int> m_memory;
 };

@@ -4,8 +4,6 @@ ALU::ALU()
     : m_2OperandsOperations{}
     , m_1OperandOperations{}
     , m_value{0}
-    , m_booleanValue{}
-    , m_flag{} 
 {
     initialize2OperandsOperations();
     initialize1OperandOperations();
@@ -72,32 +70,23 @@ void ALU::inc(int val) {
 }
 
 void ALU::myNot(int val) {
-    m_booleanValue = !val; 
+    m_value = !val; 
 }
 
 void ALU::myAnd(int val1, int val2) {
-    m_booleanValue = val1 & val2;
+    m_value = val1 & val2;
 }
 
 void ALU::myOr(int val1, int val2) {
-    m_booleanValue = val1 | val2;
+    m_value = val1 | val2;
 }
 
 void ALU::cmp(int val1, int val2) {
     sub(val1, val2);
-    m_flag = m_value;
 }
 
 int ALU::getValue() const {
     return m_value;
-}
-
-bool ALU::getBooleanValue() const {
-    return m_booleanValue;
-}
-
-int ALU::getFlag() const {
-    return m_flag;
 }
 
 std::map<std::string, void(ALU::*)(int, int)> ALU::get2OperandsOperations() const {

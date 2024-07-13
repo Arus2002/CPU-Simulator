@@ -21,3 +21,7 @@ void RAM::setMemoryValue(std::size_t index, int value) {
     }
     m_memory[index] = value;
 }
+
+std::size_t RAM::getMemorySize() const {
+    return m_memory.size();
+}

@@ -1,12 +1,14 @@
-mov ayb, 20 
-mov ben, 12
+mov [5], 11
+print [5]
+mov BEN, 12
+print BEN
 l1:
-print gim
-inc ayb
-cmp ayb, ben
-je l1
-inc ayb
-dec ben
-print atb
-print ben
+print GIM
+inc [5]
+cmp [5], BEN
+je l1:
+inc AYB
+dec BEN
+print AYB
+print [5]
 end
