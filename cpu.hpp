@@ -18,6 +18,8 @@ public:
     void readFromFile(const std::string& inputFileName);
     void executeProgramme();
     void seeRam32BitAddress() const;
+    
+private:
     bool isRegister(const std::string& instruction) const;
     bool isFromRam(const std::string& instruction) const;
     bool isLiteral(const std::string& instruction) const;
