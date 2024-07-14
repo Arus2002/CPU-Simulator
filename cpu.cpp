@@ -30,7 +30,6 @@ void CPU::readFromFile(const std::string& inputFileName) {
     std::string line;
     std::size_t addressNumber = 0;
     while (std::getline(file, line)) { // Read line by line
-        //std::cout << line << std::endl; // Print each line to the console
         std::istringstream lineStream(line); // Create a string stream from the line
         std::string word;
         std::size_t count = 0;
@@ -43,33 +42,62 @@ void CPU::readFromFile(const std::string& inputFileName) {
         std::string instruction;
         std::string operand1;
         std::string operand2;
-        if (count == 3) { // Extract words from the line stream
+        // Extract words from the line stream
+        if (count == 3) { 
             lineStream >> instruction;
             lineStream >> operand1;
             operand1.pop_back();
             lineStream >> operand2;
             m_instructions.push_back({instruction, {operand1, operand2}});
-            std::cout << instruction << operand1 << operand2 << std::endl; // Print each word
         }
-        else if (count == 2) { // Extract words from the line stream
+        else if (count == 2) {
             lineStream >> instruction;
             lineStream >> operand1;
             m_instructions.push_back({instruction, {operand1, operand2}});
-            std::cout << instruction << operand1 << operand2 << std::endl; // Print each word
         }
-        else if (count == 1) { // Extract words from the line stream
+        else if (count == 1) {
             lineStream >> instruction;
             if (instruction == "end") {
                 file.close();
                 return;
             }
             m_instructions.push_back({instruction, {"label", ""}});
-            std::cout << instruction << operand1 << operand2 << std::endl; // Print each word
         }
         ++addressNumber;
     }
 
-    file.close(); // Close the file
+    file.close();
+}
+
+bool CPU::isRegister(const std::string& instruction) const {
+    if (m_registers.find(instruction) != m_registers.end()) {
+        return true;
+    }
+    return false;
+}
+
+bool CPU::isFromRam(const std::string& instruction) const {
+    if (instruction.size() > 2 && instruction[0] == '[' && instruction[instruction.size() - 1] == ']') {
+        std::string strIndex = instruction.substr(1, instruction.size() - 2);
+        for (char itr: strIndex) {
+            if (!std::isdigit(itr)) {
+                std::cout << "Not valid address!" << std::endl;
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+bool CPU::isLiteral(const std::string& instruction) const {
+    for (char itr: instruction) {
+        if (!std::isdigit(itr)) {
+            std::cout << "Not valid address!" << std::endl;
+            return false;
+        }
+    }
+    return true;
 }
 
 void CPU::executeProgramme() {
@@ -80,32 +108,20 @@ void CPU::executeProgramme() {
             bool binaryFlag = false;
             if (instruction->second.second != "") {
                 binaryFlag = true;
-                if (m_registers.find(instruction->second.second) != m_registers.end()) {
+                if (isRegister(instruction->second.second)) {
                     auto it = m_registers.find(instruction->second.second);
                     val2 = it->second;
                 }
-                else if (instruction->second.second.size() > 2 && instruction->second.second[0] == '[' && instruction->second.second[instruction->second.second.size() - 1] == ']') {
+                else if (isFromRam(instruction->second.second)) {
                     std::string strIndex = instruction->second.second.substr(1, instruction->second.second.size() - 2);
-                    for (char itr: strIndex) {
-                        if (!std::isdigit(itr)) {
-                            std::cout << "Not valid address!" << std::endl;
-                            return;
-                        }
-                    }
                     int index = std::stoi(strIndex);
                     val2 = m_ram.getMemoryValue(index);
                 }
-                else {
-                    for (char itr: instruction->second.second) {
-                        if (!std::isdigit(itr)) {
-                            std::cout << "Not valid address!" << std::endl;
-                            return;
-                        }
-                    }
+                else if (isLiteral(instruction->second.second)){
                     val2 = stoi(instruction->second.second);
                 }
             }
-            if (m_registers.find(instruction->second.first) != m_registers.end()) {
+            if (isRegister(instruction->second.first)) {
                 auto it = m_registers.find(instruction->second.first);
                 val1 = it->second;
                 if (binaryFlag) {
@@ -118,14 +134,8 @@ void CPU::executeProgramme() {
                     it->second = m_alu.getValue();
                 }
             }
-            else if(instruction->second.first.size() > 2 && instruction->second.first[0] == '[' && instruction->second.first[instruction->second.first.size() - 1] == ']') {
+            else if(isFromRam(instruction->second.first)) {
                 std::string strIndex = instruction->second.first.substr(1, instruction->second.first.size() - 2);
-                for (char itr: strIndex) {
-                    if (!std::isdigit(itr)) {
-                        std::cout << "Not valid address!" << std::endl;
-                        return;
-                    }
-                }
                 int index = std::stoi(strIndex);
                 val1 = m_ram.getMemoryValue(index);
                 if (binaryFlag) {
@@ -148,18 +158,12 @@ void CPU::executeProgramme() {
             bool firstOperandIsRegister = false;
             int index = 0;
             auto registerItr = m_registers.begin();
-            if (m_registers.find(instruction->second.first) != m_registers.end()) {
+            if (isRegister(instruction->second.first)) {
                 registerItr = m_registers.find(instruction->second.first);
                 firstOperandIsRegister = true;
             }
-            else if(instruction->second.first.size() > 2 && instruction->second.first[0] == '[' && instruction->second.first[instruction->second.first.size() - 1] == ']') {
+            else if(isFromRam(instruction->second.first)) {
                 std::string strIndex = instruction->second.first.substr(1, instruction->second.first.size() - 2);
-                for (char itr: strIndex) {
-                    if (!std::isdigit(itr)) {
-                        std::cout << "Not valid address!" << std::endl;
-                        return;
-                    }
-                }
                 index = std::stoi(strIndex);
                 firstOperandIsFromMemory = true;
             }
@@ -168,28 +172,16 @@ void CPU::executeProgramme() {
                 return;
             }
             int val2;
-            if (m_registers.find(instruction->second.second) != m_registers.end()) {
+            if (isRegister(instruction->second.second)) {
                 auto it = m_registers.find(instruction->second.second);
                 val2 = it->second;
             }
-            else if(instruction->second.second.size() > 2 && instruction->second.second[0] == '[' && instruction->second.second[instruction->second.second.size() - 1] == ']') {
+            else if (isFromRam(instruction->second.second)) {
                 std::string strIndex = instruction->second.second.substr(1, instruction->second.second.size() - 2);
-                for (char itr: strIndex) {
-                    if (!std::isdigit(itr)) {
-                        std::cout << "Not valid address!" << std::endl;
-                        return;
-                    }
-                }
                 int index = std::stoi(strIndex);
                 val2 = m_ram.getMemoryValue(index);
             }
-            else {
-                for (char itr: instruction->second.second) {
-                    if (!std::isdigit(itr)) {
-                        std::cout << "Not valid address!" << std::endl;
-                        return;
-                    }
-                }
+            else if (isLiteral(instruction->second.second)){
                 val2 = std::stoi(instruction->second.second);
             }
             if (firstOperandIsFromMemory) {
@@ -205,28 +197,16 @@ void CPU::executeProgramme() {
         }
         else if (instruction->first == "print") {
             int val;
-            if (m_registers.find(instruction->second.first) != m_registers.end()) {
+            if (isRegister(instruction->second.first)) {
                 auto it = m_registers.find(instruction->second.first);
                 val = it->second;
             }
-            else if(instruction->second.first.size() > 2 && instruction->second.first[0] == '[' && instruction->second.first[instruction->second.first.size() - 1] == ']') {
+            else if(isFromRam(instruction->second.first)) {
                 std::string strIndex = instruction->second.first.substr(1, instruction->second.first.size() - 2);
-                for (char itr: strIndex) {
-                    if (!std::isdigit(itr)) {
-                        std::cout << "Not valid address!" << std::endl;
-                        return;
-                    }
-                }
                 int index = std::stoi(strIndex);
                 val = m_ram.getMemoryValue(index);
             }
-            else {
-                for (char itr: instruction->second.first) {
-                    if (!std::isdigit(itr)) {
-                        std::cout << "Not valid address!" << std::endl;
-                        return;
-                    }
-                }
+            else if (isLiteral(instruction->second.first)){
                 val = std::stoi(instruction->second.first);
             }
             std::cout << instruction->second.first << " value is: " << val << std::endl;;
